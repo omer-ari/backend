@@ -1,4 +1,6 @@
 var mongoose=require('mongoose');
+
+//var dbURI='mongodb://localhost/mekanbul';
 var dbURI='mongodb+srv://omerari:Aa123456@cluster0.akuitjs.mongodb.net/mekanbul?retryWrites=true&w=majority&appName=Cluster0';
 //         mongodb+srv://omerari:<db_password>@cluster0.akuitjs.mongodb.net/?appName=Cluster0
 mongoose.connect(dbURI);
@@ -12,9 +14,14 @@ mongoose.connection.on('disconnected',function(){
     console.log('Mongoose bağlantısı kesildi.');
 });
 process.on('SIGINT',function(){
-    mongoose.connection.close(function(){
-        console.log('Uygulama sonlandırıldı, Mongoose bağlantısı kapatıldı.');
-        process.exit(0);
-    });
+    mongoose.connection.close()
+        .then(function(){
+            console.log('Uygulama sonlandırıldı, Mongoose bağlantısı kapatıldı.');
+            process.exit(0);
+        })
+        .catch(function(err){
+            console.error('Mongoose bağlantısı kapatılırken hata:', err);
+            process.exit(1);
+        });
 });
-require('./venue');
+require('./venue'); 
