@@ -21,10 +21,23 @@ module.exports = async function handler(req, res) {
   }
 
   const id = req.query.id;
+  console.log('API call /api/venues/:id, id=', id, 'method=', req.method);
   if (req.method === 'GET') {
     try {
+      if (!id) {
+        console.warn('No id provided in request');
+        return res.status(400).json({ error: 'id param is required' });
+      }
+      // validate ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.warn('Invalid ObjectId format:', id);
+        return res.status(400).json({ error: 'Invalid id format' });
+      }
       const venue = await Venue.findById(id).lean();
-      if (!venue) return res.status(404).json({ error: 'Mekan bulunamadı' });
+      console.log('DB query result for id', id, ':', !!venue);
+      if (!venue) {
+        return res.status(404).json({ error: 'Mekan bulunamadı' });
+      }
       return res.status(200).json(venue);
     } catch (err) {
       console.error('Find error', err);
